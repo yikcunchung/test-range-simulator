@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Range Simulator — Volkswagen</title>
+<title>Test Range Simulator</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -16,12 +16,9 @@
 /* ── grid.css ── */
 .grid-container {
   width: 100%;
-  padding-left: calc(100vw / 24);
-  padding-right: calc(100vw / 24);
+  padding-left: calc(100vw / 12);
+  padding-right: calc(100vw / 12);
   box-sizing: border-box;
-}
-@media (min-width: 2560px) {
-  .grid-container { padding-left: calc(100vw / 8); padding-right: calc(100vw / 8); }
 }
 
 /* ── Base ── */
@@ -68,11 +65,8 @@ body {
 .topbar-container {
   display: flex; align-items: center; justify-content: space-between;
   width: 100%;
-  padding: 0 calc(100vw / 24);
+  padding: 0 4.16vw;
   box-sizing: border-box;
-}
-@media (min-width: 2560px) {
-  .topbar-container { padding: 0 calc(100vw / 8); }
 }
 
 .topbar-left {
@@ -150,9 +144,6 @@ body {
 .range-simulator {
   padding-inline: 8.33vw;
   padding-bottom: 56px;
-}
-@media (min-width: 2560px) {
-  .range-simulator { padding-inline: calc(100vw / 8); }
 }
 
 /* Header */
@@ -282,52 +273,47 @@ body {
 }
 .q-icon { width: 24px; height: 24px; flex-shrink: 0; }
 
-/* ── Floating label select — custom visual wrapper ── */
-.fl-select {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
-  height: 50px;
-  color: rgb(27, 34, 54);
-  padding: 0px 16px;
-  box-shadow: rgb(161, 164, 172) 0px 0px 0px 1px;
-  border-radius: 8px;
-  cursor: pointer;
-  box-sizing: border-box;
-}
-.fl-select:focus-within {
-  box-shadow: rgb(41, 48, 67) 0px 0px 0px 1.5px;
-}
-/* Native select — invisible, sits on top as the actual interactive element */
+/* ── Floating label select ── */
+.fl-select { position: relative; }
+
 .fl-select select {
-  position: absolute;
-  inset: 0;
-  width: 100%; height: 100%;
-  opacity: 0;
-  cursor: pointer;
-  z-index: 2;
-  margin: 0; padding: 0; border: none;
+  width: 100%; height: 50px;
+  padding: 20px 48px 0 16px;
+  font-family: var(--font-text); font-size: 16px;
+  font-weight: 400; color: rgba(0,14,38,1);
+  background: transparent;
+  border: 1px solid rgb(161,164,172);
+  border-radius: 8px;
   appearance: none;
+  cursor: pointer;
+  outline: none;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
 }
-/* Floating label */
+
+/* Hover — exact Figma values */
+.fl-select:hover select { border-color: rgba(153,127,103,1); color: rgba(115,62,1,1); }
+.fl-select:hover .fl-label { color: rgba(115,62,1,1); }
+.fl-select:hover .fl-chevron svg path { fill: rgba(115,62,1,1); }
+
+/* Focus/open — handled via JS, not CSS :focus */
+.fl-select select.focused-closed {
+  border-color: rgba(200,108,3,1);
+  outline: 2px solid rgba(200,108,3,1);
+  outline-offset: 0;
+}
+
 .fl-label {
+  position: absolute; top: 6px; left: 16px;
   font-family: var(--font-text); font-size: 12px; line-height: 18px;
-  font-weight: 400; color: var(--label-blue);
+  font-weight: 400; color: rgba(0,30,80,1);
   pointer-events: none;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  max-width: calc(100% - 32px);
-  flex-shrink: 0;
+  max-width: calc(100% - 48px);
+  transition: color 0.15s;
 }
-/* Value display — shows the selected option text */
-.fl-value {
-  font-family: var(--font-text); font-size: 16px; line-height: 19px;
-  font-weight: 400; color: rgba(0, 14, 38, 1);
-  pointer-events: none;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  max-width: calc(100% - 32px);
-}
+
 .fl-chevron {
   position: absolute; right: 8px; top: 50%;
   transform: translateY(-50%);
@@ -335,15 +321,16 @@ body {
   display: flex; align-items: center; justify-content: center;
   width: 32px; height: 32px; z-index: 1;
 }
+.fl-chevron svg path { transition: fill 0.15s; }
 
-/* Select without floating label — tyre select */
-.fl-select.fl-no-label { padding: 0px 16px; }
-.fl-select.fl-no-label .fl-value {
-  font-size: 16px; line-height: 50px;
-}
+/* Select without floating label */
+#tyre-select { padding: 15px 48px 15px 16px; }
 
 .select-group { display: flex; gap: 12px; }
 .select-group .fl-select { flex: 1; min-width: 0; }
+
+/* Dist thumb hover */
+.dist-thumb.hovered { background: #997F67; }
 
 /* ── Distribution block ── */
 .dist-wrap { display: flex; flex-direction: column; }
@@ -409,6 +396,7 @@ body {
   cursor: ew-resize;
   user-select: none;
   touch-action: none;
+  pointer-events: auto;
 }
 .dist-thumb svg { display: block; pointer-events: none; }
 
@@ -526,7 +514,7 @@ input[type="range"] {
 }
 
 /* Model Selection: gap:4 between combo and model frame */
-.model-selection { display: flex; flex-direction: column; gap: 4px; }
+.model-selection { display: flex; flex-direction: column; gap: 4px; background: var(--bg); }
 
 /* Combo inside model: gap:12 */
 .model-combo { display: flex; flex-direction: column; gap: 12px; }
@@ -534,13 +522,12 @@ input[type="range"] {
 /* Model frame: gap:4 between Asset and Content */
 .model-frame { display: flex; flex-direction: column; gap: 4px; }
 
-/* Vehicle: 420x210 IMAGE fill */
+/* Vehicle: full width, auto height */
 .vehicle-asset {
-  width: 100%; height: 210px;
+  width: 100%;
   background: transparent; overflow: hidden;
-  display: flex; align-items: center; justify-content: center;
 }
-.vehicle-asset img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.vehicle-asset img { width: 100%; height: auto; object-fit: contain; display: block; }
 
 /* Model content: gap:12 */
 .model-content { display: flex; flex-direction: column; gap: 12px; }
@@ -605,7 +592,11 @@ input[type="range"] {
   display: flex; align-items: center; justify-content: center; gap: 4px;
   transition: background 0.15s, color 0.15s;
 }
-.cta-button:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+.cta-button:hover {
+  background: var(--button-secondary-hover, #CCBDAB);
+  border-color: transparent;
+  color: var(--navy);
+}
 
 /* ════════════════════════════
    DISCLAIMER — gap:32, inside Range Simulator
@@ -782,15 +773,13 @@ input[type="range"] {
             <span class="question-label">What tyres does your vehicle have?</span>
             <svg class="q-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="rgba(27,34,54,1)" stroke-width="1.5"/><path d="M12 11V16" stroke="rgba(27,34,54,1)" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="8" r="0.8" fill="rgba(27,34,54,1)"/></svg>
           </div>
-          <div class="fl-select fl-no-label">
+          <div class="fl-select">
             <select id="tyre-select" onchange="syncSelectValue(this); updateRange()">
               <option>Winter tyres 19"</option>
               <option>Summer tyres 19"</option>
               <option>Winter tyres 20"</option>
               <option>Summer tyres 20"</option>
-            </select>
-            <span class="fl-value" id="tyre-value">Winter tyres 19"</span>
-            <span class="fl-chevron">
+            </select>            <span class="fl-chevron">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 12 17.713 C 11.55 17.713 11.127 17.535 10.811 17.213 L 1.025 7.216 L 1.975 6.285 L 11.76 16.281 C 11.89 16.412 12.109 16.413 12.24 16.280 L 22.025 6.285 L 22.975 7.216 L 13.19 17.212 C 12.873 17.536 12.45 17.713 12 17.713 Z" fill="rgba(0,30,80,1)"/></svg>
             </span>
           </div>
@@ -867,25 +856,21 @@ input[type="range"] {
             <div class="select-group">
               <div class="fl-select">
                 <span class="fl-label">The new ID.3 Neo</span>
-                <select id="trim-select" onchange="updateBatteryOptions(); updateCarImage(); syncSelectValue(this); updateRange()">
+                <select id="trim-select" onchange="updateBatteryOptions(); updateCarImage(); updateRange()">
                   <option value="Trend">Trend</option>
                   <option value="Life">Life</option>
                   <option value="Style">Style</option>
-                </select>
-                <span class="fl-value" id="trim-value">Trend</span>
-                <span class="fl-chevron">
+                </select>                <span class="fl-chevron">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 12 17.713 C 11.55 17.713 11.127 17.535 10.811 17.213 L 1.025 7.216 L 1.975 6.285 L 11.76 16.281 C 11.89 16.412 12.109 16.413 12.24 16.280 L 22.025 6.285 L 22.975 7.216 L 13.19 17.212 C 12.873 17.536 12.45 17.713 12 17.713 Z" fill="rgba(0,30,80,1)"/></svg>
                 </span>
               </div>
               <div class="fl-select">
                 <span class="fl-label">Battery / Motor</span>
-                <select onchange="syncSelectValue(this); updateRange()" id="battery-select">
+                <select onchange="updateRange()" id="battery-select">
                   <option value="50">50 kWh / 125 kW (170 PS)</option>
                   <option value="58">58 kWh / 140 kW (190 PS)</option>
                   <option value="79">79 kWh / 170 kW (231 PS)</option>
-                </select>
-                <span class="fl-value" id="battery-value">50 kWh / 125 kW (170 PS)</span>
-                <span class="fl-chevron">
+                </select>                <span class="fl-chevron">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 12 17.713 C 11.55 17.713 11.127 17.535 10.811 17.213 L 1.025 7.216 L 1.975 6.285 L 11.76 16.281 C 11.89 16.412 12.109 16.413 12.24 16.280 L 22.025 6.285 L 22.975 7.216 L 13.19 17.212 C 12.873 17.536 12.45 17.713 12 17.713 Z" fill="rgba(0,30,80,1)"/></svg>
                 </span>
               </div>
@@ -1121,6 +1106,48 @@ window.addEventListener('DOMContentLoaded', () => {
   });
   initDistSlider();
   updateRange();
+
+  // Focus state: show after dropdown closes, whether item selected or dismissed
+  document.querySelectorAll('.fl-select select').forEach(sel => {
+    let isOpen = false;
+    let clickedOutside = false;
+
+    sel.addEventListener('mousedown', () => {
+      isOpen = !isOpen;
+      if (isOpen) sel.classList.remove('focused-closed');
+    });
+
+    sel.addEventListener('change', () => {
+      isOpen = false;
+      sel.classList.add('focused-closed');
+    });
+
+    sel.addEventListener('blur', () => {
+      if (clickedOutside && isOpen) {
+        sel.classList.add('focused-closed');
+      } else if (!isOpen) {
+        sel.classList.remove('focused-closed');
+      }
+      isOpen = false;
+      clickedOutside = false;
+    });
+
+    // mousedown on document fires BEFORE blur — set flag here
+    document.addEventListener('mousedown', e => {
+      if (e.target !== sel && !sel.contains(e.target)) {
+        clickedOutside = true;
+      } else {
+        clickedOutside = false;
+      }
+    });
+
+    sel.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === 'Escape') {
+        isOpen = false;
+        setTimeout(() => sel.classList.add('focused-closed'), 50);
+      }
+    });
+  });
 });
 
 // ── Distribution slider drag ──
@@ -1137,26 +1164,26 @@ function initDistSlider() {
   let pct1 = 33.33, pct2 = 66.66;
   const MIN_GAP = 3;
   const ICON_MAX = 24, ICON_MIN = 10;
+  let hover1 = false, hover2 = false;
 
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
   function setPositions() {
-    // Knobs
     thumb1.style.left = pct1 + '%';
     thumb2.style.left = pct2 + '%';
-    // Dividers
     if (div1) div1.style.left = pct1 + '%';
     if (div2) div2.style.left = pct2 + '%';
 
-    // Icon centres (midpoint of each region)
+    // Reapply hover classes after position update
+    thumb1.classList.toggle('hovered', hover1);
+    thumb2.classList.toggle('hovered', hover2);
+
     const centres = [pct1 / 2, (pct1 + pct2) / 2, (pct2 + 100) / 2];
-    // Region widths as % of block
     const widths  = [pct1, pct2 - pct1, 100 - pct2];
 
     icons.forEach((icon, i) => {
       if (!icon) return;
       icon.style.left = centres[i] + '%';
-      // Scale icon: 24px at ≥20% width, shrinks linearly to 10px at 5%
       const wPct = widths[i];
       const size = clamp(ICON_MIN + (ICON_MAX - ICON_MIN) * (wPct - 5) / 15, ICON_MIN, ICON_MAX);
       const opacity = wPct < 4 ? 0 : Math.min(1, (wPct - 4) / 4);
@@ -1165,7 +1192,6 @@ function initDistSlider() {
       icon.style.opacity = opacity;
     });
 
-    // Update % text in fixed label columns
     const v1 = Math.round(pct1), v2 = Math.round(pct2);
     const vals = [v1, v2 - v1, 100 - v2];
     labels.forEach((label, i) => {
@@ -1177,33 +1203,44 @@ function initDistSlider() {
   }
 
   function makeDraggable(thumb, isThumb1) {
+    let dragging = false;
+
     function onMove(e) {
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const rect = block.getBoundingClientRect();
       const raw = ((clientX - rect.left) / rect.width) * 100;
-      if (isThumb1) {
-        pct1 = clamp(raw, 0, pct2 - MIN_GAP);
-      } else {
-        pct2 = clamp(raw, pct1 + MIN_GAP, 100);
-      }
+      if (isThumb1) pct1 = clamp(raw, 0, pct2 - MIN_GAP);
+      else          pct2 = clamp(raw, pct1 + MIN_GAP, 100);
       setPositions();
     }
     function onEnd() {
+      dragging = false;
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onEnd);
       document.removeEventListener('touchmove', onMove);
       document.removeEventListener('touchend', onEnd);
     }
     thumb.addEventListener('mousedown', e => {
-      e.preventDefault();
+      e.preventDefault(); dragging = true;
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onEnd);
     });
     thumb.addEventListener('touchstart', e => {
-      e.preventDefault();
+      e.preventDefault(); dragging = true;
       document.addEventListener('touchmove', onMove, { passive: false });
       document.addEventListener('touchend', onEnd);
     }, { passive: false });
+
+    thumb.addEventListener('mouseenter', () => {
+      if (isThumb1) hover1 = true; else hover2 = true;
+      thumb.classList.add('hovered');
+    });
+    thumb.addEventListener('mouseleave', () => {
+      if (!dragging) {
+        if (isThumb1) hover1 = false; else hover2 = false;
+        thumb.classList.remove('hovered');
+      }
+    });
   }
 
   makeDraggable(thumb1, true);
