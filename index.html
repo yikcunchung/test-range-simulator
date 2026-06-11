@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Test Range Simulator</title>
+<title>Range Simulator — Volkswagen</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -282,40 +282,66 @@ body {
 }
 .q-icon { width: 24px; height: 24px; flex-shrink: 0; }
 
-/* ── Floating label select ── */
-.fl-select { position: relative; }
-.fl-select select {
-  width: 100%; height: 50px;
-  padding: 20px 48px 0 16px;
-  font-family: var(--font-text); font-size: 16px;
-  font-weight: 400; color: rgba(0,14,38,1);
-  background: transparent; border: 1px solid rgb(161,164,172);
-  border-radius: 8px; appearance: none;
-  cursor: pointer; outline: none; line-height: 1;
-  text-overflow: ellipsis;
-  transition: border-color 0.15s;
-  vertical-align: top;
+/* ── Floating label select — custom visual wrapper ── */
+.fl-select {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  height: 50px;
+  color: rgb(27, 34, 54);
+  padding: 0px 16px;
+  box-shadow: rgb(161, 164, 172) 0px 0px 0px 1px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-sizing: border-box;
 }
-.fl-select select:focus { border-color: var(--navy); }
+.fl-select:focus-within {
+  box-shadow: rgb(41, 48, 67) 0px 0px 0px 1.5px;
+}
+/* Native select — invisible, sits on top as the actual interactive element */
+.fl-select select {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+  margin: 0; padding: 0; border: none;
+  appearance: none;
+}
+/* Floating label */
 .fl-label {
-  position: absolute; top: 6px; left: 16px;
   font-family: var(--font-text); font-size: 12px; line-height: 18px;
   font-weight: 400; color: var(--label-blue);
   pointer-events: none;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  max-width: calc(100% - 48px);
+  max-width: calc(100% - 32px);
+  flex-shrink: 0;
 }
-/* label bottom: 6+18=24px, padding-top:20 → native value renders at ~22px → ~2px gap ✓ */
+/* Value display — shows the selected option text */
+.fl-value {
+  font-family: var(--font-text); font-size: 16px; line-height: 19px;
+  font-weight: 400; color: rgba(0, 14, 38, 1);
+  pointer-events: none;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: calc(100% - 32px);
+}
 .fl-chevron {
   position: absolute; right: 8px; top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
   display: flex; align-items: center; justify-content: center;
-  width: 32px; height: 32px;
+  width: 32px; height: 32px; z-index: 1;
 }
 
-/* Select without floating label */
-#tyre-select { padding: 15px 48px 15px 16px; }
+/* Select without floating label — tyre select */
+.fl-select.fl-no-label { padding: 0px 16px; }
+.fl-select.fl-no-label .fl-value {
+  font-size: 16px; line-height: 50px;
+}
+
 .select-group { display: flex; gap: 12px; }
 .select-group .fl-select { flex: 1; min-width: 0; }
 
@@ -756,13 +782,14 @@ input[type="range"] {
             <span class="question-label">What tyres does your vehicle have?</span>
             <svg class="q-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="rgba(27,34,54,1)" stroke-width="1.5"/><path d="M12 11V16" stroke="rgba(27,34,54,1)" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="8" r="0.8" fill="rgba(27,34,54,1)"/></svg>
           </div>
-          <div class="fl-select">
-            <select id="tyre-select" onchange="updateRange()">
+          <div class="fl-select fl-no-label">
+            <select id="tyre-select" onchange="syncSelectValue(this); updateRange()">
               <option>Winter tyres 19"</option>
               <option>Summer tyres 19"</option>
               <option>Winter tyres 20"</option>
               <option>Summer tyres 20"</option>
             </select>
+            <span class="fl-value" id="tyre-value">Winter tyres 19"</span>
             <span class="fl-chevron">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 12 17.713 C 11.55 17.713 11.127 17.535 10.811 17.213 L 1.025 7.216 L 1.975 6.285 L 11.76 16.281 C 11.89 16.412 12.109 16.413 12.24 16.280 L 22.025 6.285 L 22.975 7.216 L 13.19 17.212 C 12.873 17.536 12.45 17.713 12 17.713 Z" fill="rgba(0,30,80,1)"/></svg>
             </span>
@@ -840,22 +867,24 @@ input[type="range"] {
             <div class="select-group">
               <div class="fl-select">
                 <span class="fl-label">The new ID.3 Neo</span>
-                <select id="trim-select" onchange="updateBatteryOptions(); updateCarImage(); updateRange()">
+                <select id="trim-select" onchange="updateBatteryOptions(); updateCarImage(); syncSelectValue(this); updateRange()">
                   <option value="Trend">Trend</option>
                   <option value="Life">Life</option>
                   <option value="Style">Style</option>
                 </select>
+                <span class="fl-value" id="trim-value">Trend</span>
                 <span class="fl-chevron">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 12 17.713 C 11.55 17.713 11.127 17.535 10.811 17.213 L 1.025 7.216 L 1.975 6.285 L 11.76 16.281 C 11.89 16.412 12.109 16.413 12.24 16.280 L 22.025 6.285 L 22.975 7.216 L 13.19 17.212 C 12.873 17.536 12.45 17.713 12 17.713 Z" fill="rgba(0,30,80,1)"/></svg>
                 </span>
               </div>
               <div class="fl-select">
                 <span class="fl-label">Battery / Motor</span>
-                <select onchange="updateRange()" id="battery-select">
+                <select onchange="syncSelectValue(this); updateRange()" id="battery-select">
                   <option value="50">50 kWh / 125 kW (170 PS)</option>
                   <option value="58">58 kWh / 140 kW (190 PS)</option>
                   <option value="79">79 kWh / 170 kW (231 PS)</option>
                 </select>
+                <span class="fl-value" id="battery-value">50 kWh / 125 kW (170 PS)</span>
                 <span class="fl-chevron">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 12 17.713 C 11.55 17.713 11.127 17.535 10.811 17.213 L 1.025 7.216 L 1.975 6.285 L 11.76 16.281 C 11.89 16.412 12.109 16.413 12.24 16.280 L 22.025 6.285 L 22.975 7.216 L 13.19 17.212 C 12.873 17.536 12.45 17.713 12 17.713 Z" fill="rgba(0,30,80,1)"/></svg>
                 </span>
@@ -961,6 +990,12 @@ function updateCarImage() {
   if (img && carImages[trim]) img.src = carImages[trim];
 }
 
+// Sync custom display value from native select
+function syncSelectValue(sel) {
+  const valueEl = document.getElementById(sel.id.replace('-select', '-value'));
+  if (valueEl) valueEl.textContent = sel.options[sel.selectedIndex]?.text ?? '';
+}
+
 // Battery options per trim
 const batteryOptions = {
   Trend: [
@@ -987,6 +1022,9 @@ function updateBatteryOptions() {
   sel.innerHTML = opts.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
   // Restore previous selection if still available, else default to first
   if (opts.some(o => o.value === current)) sel.value = current;
+  // Sync display value
+  const valEl = document.getElementById('battery-value');
+  if (valEl) valEl.textContent = sel.options[sel.selectedIndex]?.text ?? '';
 }
 
 // ── Slot machine digit roller ──
@@ -1076,6 +1114,11 @@ window.addEventListener('DOMContentLoaded', () => {
   initSlider('temp-slider', 'temp-tooltip', 'temp-thumb');
   updateBatteryOptions();
   updateCarImage();
+  // Sync all custom select display values
+  ['trim-select','battery-select','tyre-select'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (sel) syncSelectValue(sel);
+  });
   initDistSlider();
   updateRange();
 });
