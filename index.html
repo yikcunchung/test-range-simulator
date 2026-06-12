@@ -165,17 +165,46 @@ body {
 /* ════════════════════════════
    GRID LAYOUT
 ════════════════════════════ */
-.input-section      { grid-area: inputs; }
-.output-panel {
-  grid-area: carsel / carsel / configure / configure; /* spans carsel→configure rows */
-  display: flex; flex-direction: column; gap: 24px;
-  position: sticky; top: 80px; /* below 64px topbar + 16px breathing room */
-  align-self: start;
+.section-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
-.model-selection    { /* no grid-area — inside output-panel */ }
-.result-section     { margin-top: 0; }
-.cta-button         { margin-top: 0; }
-.disclaimer         { grid-area: resultdisclaimer; margin-top: 40px; }
+
+.input-section  { }
+.right-col      { display: flex; flex-direction: column; gap: 24px; }
+.output-panel   { display: flex; flex-direction: column; gap: 24px; }
+.disclaimer     { margin-top: 40px; }
+
+.model-selection { }
+.result-section  { margin-top: 0; }
+.cta-button      { margin-top: 0; }
+
+/* ≥960px — CSS grid with exact fr ratios */
+@media (min-width: 960px) {
+  .section-container {
+    display: grid;
+    grid-template: "inputs right" / 4.2fr 2.45fr;
+    column-gap: 4.16vw;
+    row-gap: 0;
+    align-items: start;
+    position: relative;
+  }
+  .input-section {
+    grid-area: inputs;
+  }
+  .right-col {
+    grid-area: right;
+    position: sticky;
+    top: 76px;
+    bottom: 0;
+    align-self: start;
+    z-index: 1;
+  }
+  .disclaimer {
+    margin-top: 40px;
+  }
+}
 
 /* ════════════════════════════
    INPUT SECTION
@@ -201,32 +230,9 @@ body {
    Desktop XL 2560px
 ════════════════════════════ */
 
-/* ≥960px — two-column grid */
-@media (min-width: 960px) {
-  .section-container {
-    display: grid;
-    grid-template:
-      "inputs carsel"
-      "inputs output"
-      "inputs configure"
-      "inputs ."
-      "resultdisclaimer resultdisclaimer" / 4.2fr 2.45fr;
-    column-gap: 4.16vw;
-    align-items: start;
-  }
-}
-
 /* <960px — single column */
 @media (max-width: 959px) {
-  .section-container {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-  .output-panel {
-    position: static;
-    display: contents; /* children flow naturally in the column */
-  }
+  .right-col { display: contents; }
   .result-section { margin-top: 0; }
   .cta-button { margin-top: 0; }
   .disclaimer { margin-top: 24px; }
@@ -275,7 +281,7 @@ body {
 .q-icon { width: 24px; height: 24px; flex-shrink: 0; }
 
 /* ── Floating label select ── */
-.fl-select { position: relative; }
+.fl-select { position: relative; overflow: visible; }
 
 .fl-select select {
   width: 100%; height: 50px;
@@ -302,7 +308,7 @@ body {
 .fl-select select.focused-closed {
   border-color: rgba(200,108,3,1);
   outline: 2px solid rgba(200,108,3,1);
-  outline-offset: 0;
+
 }
 
 .fl-label {
@@ -330,8 +336,18 @@ body {
 .select-group { display: flex; gap: 12px; }
 .select-group .fl-select { flex: 1; min-width: 0; }
 
-/* Dist thumb hover */
-.dist-thumb.hovered { background: #997F67; }
+/* Dist thumb hover — after base rule so specificity wins */
+.dist-thumb:hover,
+.dist-thumb.hovered { background: #997F67 !important; }
+
+/* Switch hover — change SVG rect stroke and knob colour */
+.vw-switch:hover .vw-switch-track svg rect { stroke: #997F67; }
+.vw-switch:hover .vw-switch-knob { background: #997F67; }
+.vw-switch:hover .vw-switch-track-bg { background: #997F67; }
+
+/* Toggle hover */
+.vw-toggle:hover .vw-toggle-track { background: #997F67; }
+.vw-toggle:hover .vw-toggle-track { border-color: #997F67; }
 
 /* ── Distribution block ── */
 .dist-wrap { display: flex; flex-direction: column; }
@@ -375,7 +391,7 @@ body {
 /* Labels row — static flex thirds, always fixed positions */
 .dist-labels {
   display: flex;
-  margin-top: 10px;
+  margin-top: 20px; /* 12px knob protrusion + 8px gap */
 }
 .dist-label {
   flex: 1;
@@ -398,7 +414,12 @@ body {
   user-select: none;
   touch-action: none;
   pointer-events: auto;
+  border: none; /* button reset */
+  padding: 0;   /* button reset */
+  outline: none; /* button reset */
 }
+.dist-thumb:hover rect,
+.dist-thumb.hovered rect { fill: #997F67; }
 .dist-thumb svg { display: block; pointer-events: none; }
 
 /* ── Switch — 60×24, border track, filled knob ── */
@@ -708,14 +729,14 @@ input[type="range"] {
               <div class="dist-divider" id="dist-divider-2" style="left:66.66%;"></div>
 
               <!-- Knob 1: top edge -->
-              <div class="dist-thumb" id="dist-thumb-1" style="left:33.33%; top:0; transform:translate(-50%,-50%);">
+              <button class="dist-thumb" id="dist-thumb-1" style="left:33.33%; top:0; transform:translate(-50%,-50%);">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="12" fill="#293043"/><path d="M15.72 9.09L14.73 10L15.93 11.35H8.12L9.32 10L8.32 9.11C6.06 11.61 6.06 11.71 6.06 12C6.06 12.29 6.06 12.4 8.33 14.91L9.33 14.02L8.12 12.67H15.93L14.73 14L15.73 14.89C17.99 12.4 17.99 12.3 17.99 12C17.99 11.7 17.99 11.61 15.72 9.09Z" fill="white"/></svg>
-              </div>
+              </button>
 
               <!-- Knob 2: bottom edge -->
-              <div class="dist-thumb" id="dist-thumb-2" style="left:66.66%; bottom:0; transform:translate(-50%,50%);">
+              <button class="dist-thumb" id="dist-thumb-2" style="left:66.66%; bottom:0; transform:translate(-50%,50%);">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="12" fill="#293043"/><path d="M15.72 9.09L14.73 10L15.93 11.35H8.12L9.32 10L8.32 9.11C6.06 11.61 6.06 11.71 6.06 12C6.06 12.29 6.06 12.4 8.33 14.91L9.33 14.02L8.12 12.67H15.93L14.73 14L15.73 14.89C17.99 12.4 17.99 12.3 17.99 12C17.99 11.7 17.99 11.61 15.72 9.09Z" fill="white"/></svg>
-              </div>
+              </button>
 
               <!-- Icons — absolutely centred in their region by JS -->
               <div class="dist-icon" id="dist-icon-0">
@@ -842,8 +863,10 @@ input[type="range"] {
 
       </div><!-- /input-section -->
 
-      <!-- ════ OUTPUT PANEL — sticky right column ════ -->
-      <div class="output-panel">
+      <!-- ════ RIGHT COLUMN — sticky ════ -->
+      <div class="right-col">
+        <!-- OUTPUT PANEL -->
+        <div class="output-panel">
 
         <!-- ════ MODEL SELECTION (carsel area) ════ -->
         <div class="model-selection">
@@ -912,14 +935,15 @@ input[type="range"] {
         <button class="cta-button">Configure this ID. model &nbsp;→</button>
 
       </div><!-- /output-panel -->
+      </div><!-- /right-col -->
 
-        <!-- Disclaimer: grid-area: resultdisclaimer -->
+      </div><!-- /section-container -->
+
+        <!-- Disclaimer: outside section-container so sticky stop = card bottom -->
         <div class="disclaimer">
           <span class="disclaimer-num">1</span>
           <p class="disclaimer-copy">Estimated range only (based on user inputs and test values) for the standard German specification vehicle (model year 2024). Actual results will vary. Estimated range assumes the battery is fully charged (to 100%) and is depleted to 0%. Range figures are provided for information and comparability only. Only compare range figures with other vehicles tested to the same technical procedures. These figures may not reflect real life driving results, which will depend upon a number of factors including differences between UK and standard specification, the options you choose, accessories fitted (post-registration), variations in weather, driving styles, vehicle load, starting and finish charge etc. The tool provides an indicative impact for changes in some of these factors but this will not reflect your actual use. Battery electric vehicles require mains electricity for charging. Zero emissions while driving. Figures are subject to change due to ongoing approvals/changes in model specification. Please consult your retailer for further information. The vehicle specification used in the tool may vary due to review of the model range line up throughout the year. Data correct as at February 2024.</p>
         </div>
-
-      </div><!-- /section-container -->
 
   </div><!-- /range-simulator -->
 </div><!-- /content -->
@@ -1105,47 +1129,45 @@ window.addEventListener('DOMContentLoaded', () => {
     const sel = document.getElementById(id);
     if (sel) syncSelectValue(sel);
   });
+
   initDistSlider();
   updateRange();
 
-  // Focus state: show after dropdown closes, whether item selected or dismissed
+  // Focus state: dropdown closes = enter ring, click outside = exit
   document.querySelectorAll('.fl-select select').forEach(sel => {
+    const wrapper = sel.closest('.fl-select');
     let isOpen = false;
-    let clickedOutside = false;
+    let exitClick = false;
 
+    // Opening — remove ring, mark open
     sel.addEventListener('mousedown', () => {
-      isOpen = !isOpen;
-      if (isOpen) sel.classList.remove('focused-closed');
+      isOpen = true;
+      sel.classList.remove('focused-closed');
     });
 
+    // Closed by selecting
     sel.addEventListener('change', () => {
       isOpen = false;
       sel.classList.add('focused-closed');
     });
 
+    // Closed by dismiss — but not if blur was caused by the exit click
     sel.addEventListener('blur', () => {
-      if (clickedOutside && isOpen) {
-        sel.classList.add('focused-closed');
-      } else if (!isOpen) {
-        sel.classList.remove('focused-closed');
-      }
       isOpen = false;
-      clickedOutside = false;
+      if (!exitClick) sel.classList.add('focused-closed');
+      exitClick = false;
     });
 
-    // mousedown on document fires BEFORE blur — set flag here
+    // Click outside wrapper = exit, but not while dropdown is open
     document.addEventListener('mousedown', e => {
-      if (e.target !== sel && !sel.contains(e.target)) {
-        clickedOutside = true;
-      } else {
-        clickedOutside = false;
+      if (isOpen && !wrapper.contains(e.target)) {
+        // Dismiss click — dropdown closing, add ring after it closes
+        setTimeout(() => { isOpen = false; sel.classList.add('focused-closed'); }, 150);
+        return;
       }
-    });
-
-    sel.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === 'Escape') {
-        isOpen = false;
-        setTimeout(() => sel.classList.add('focused-closed'), 50);
+      if (!isOpen && !wrapper.contains(e.target)) {
+        exitClick = true;
+        sel.classList.remove('focused-closed');
       }
     });
   });
@@ -1163,7 +1185,7 @@ function initDistSlider() {
   if (!block || !thumb1 || !thumb2) return;
 
   let pct1 = 33.33, pct2 = 66.66;
-  const MIN_GAP = 3;
+  const MIN_GAP = 0;
   const ICON_MAX = 24, ICON_MIN = 10;
   let hover1 = false, hover2 = false;
 
@@ -1210,8 +1232,13 @@ function initDistSlider() {
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const rect = block.getBoundingClientRect();
       const raw = ((clientX - rect.left) / rect.width) * 100;
-      if (isThumb1) pct1 = clamp(raw, 0, pct2 - MIN_GAP);
-      else          pct2 = clamp(raw, pct1 + MIN_GAP, 100);
+      if (isThumb1) pct1 = clamp(raw, 0, 100);
+      else          pct2 = clamp(raw, 0, 100);
+      // Keep logical order: pct1 <= pct2
+      if (pct1 > pct2) {
+        if (isThumb1) pct1 = pct2;
+        else          pct2 = pct1;
+      }
       setPositions();
     }
     function onEnd() {
@@ -1231,18 +1258,23 @@ function initDistSlider() {
       document.addEventListener('touchmove', onMove, { passive: false });
       document.addEventListener('touchend', onEnd);
     }, { passive: false });
+  } // end makeDraggable
 
-    thumb.addEventListener('mouseenter', () => {
-      if (isThumb1) hover1 = true; else hover2 = true;
-      thumb.classList.add('hovered');
-    });
-    thumb.addEventListener('mouseleave', () => {
-      if (!dragging) {
-        if (isThumb1) hover1 = false; else hover2 = false;
-        thumb.classList.remove('hovered');
-      }
-    });
-  }
+  // Use document mousemove + elementFromPoint — reliable for absolutely positioned moving elements
+  document.addEventListener('mousemove', e => {
+    let el = document.elementFromPoint(e.clientX, e.clientY);
+    // Walk up DOM tree since elementFromPoint may return SVG child
+    let over1 = false, over2 = false;
+    while (el && el !== document.body) {
+      if (el === thumb1) { over1 = true; break; }
+      if (el === thumb2) { over2 = true; break; }
+      el = el.parentElement;
+    }
+    hover1 = over1;
+    hover2 = over2;
+    thumb1.classList.toggle('hovered', hover1);
+    thumb2.classList.toggle('hovered', hover2);
+  });
 
   makeDraggable(thumb1, true);
   makeDraggable(thumb2, false);
