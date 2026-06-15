@@ -1,0 +1,6 @@
+# Exclude heavy base64-embedded versions
+index.html
+index-battery.html
+
+# macOS
+.DS_Store
