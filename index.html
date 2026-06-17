@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Test Range Simulator</title>
+<title>Variant 1</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -415,8 +415,8 @@ body {
   align-items: center;
   gap: 2px;
 }
-.dist-seg-pct { font-family: var(--font-text); font-size: 14px; font-weight: 700; color: var(--navy); }
-.dist-seg-lbl { font-family: var(--font-text); font-size: 14px; font-weight: 400; color: var(--navy); text-align: center; }
+.dist-seg-pct { font-family: var(--font-text); font-size: 16px; font-weight: 700; color: var(--navy); }
+.dist-seg-lbl { font-family: var(--font-text); font-size: 16px; font-weight: 400; color: var(--navy); text-align: center; }
 
 /* Knobs — anchored to .dist-block */
 .dist-thumb {
@@ -561,9 +561,10 @@ input[type="range"] {
 /* Car: full width, auto height */
 .vehicle-asset {
   width: 100%;
+  aspect-ratio: 2 / 1;
   background: transparent; overflow: hidden;
 }
-.vehicle-asset img { width: 100%; height: auto; object-fit: contain; display: block; }
+.vehicle-asset img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* Model content: gap:12 */
 .model-content { display: flex; flex-direction: column; gap: 12px; }
@@ -613,7 +614,7 @@ input[type="range"] {
 }
 
 /* Header: "Estimated range" + info icon, then value */
-.result-header { display: flex; flex-direction: column; gap: 0; }
+.result-header { display: flex; flex-direction: column; gap: 4px; }
 .result-headline-row { display: flex; align-items: flex-start; gap: 8px; }
 .result-headline-label { font-family: var(--font-text); font-size: 16px; font-weight: 700; color: #fff; line-height: 1.2; }
 .result-info-icon { width: 24px; height: 24px; flex-shrink: 0; display: none; }
@@ -936,7 +937,7 @@ input[type="range"] {
               <img src="Assets/id3-trend.webp" alt="Volkswagen ID.3 Neo" id="car-img">
             </div>
             <div class="model-content">
-              <p class="model-disclaimer" id="model-disclaimer">Electricity combined fuel consumption 22.7–22.5 kWh/100mi · CO₂ emissions combined 0 g/km</p>
+              <p class="model-disclaimer" id="model-disclaimer">Electricity combined fuel consumption 22.7–22.5 kWh/100mi · CO₂ emissions combined 0 g / km</p>
 
             </div>
           </div>
@@ -1266,25 +1267,34 @@ window.addEventListener('DOMContentLoaded', () => {
   updateTrimLabel();
   const disclaimerEl = document.getElementById('model-disclaimer');
   const consumptionData = {
-    Trend:     '22.7–22.5 kWh/100mi',
-    Life:      '25.1–22.5 kWh/100mi',
-    Style:     '25.3–22.9 kWh/100mi',
-    PoloTrend: '22.8–21.0 kWh/100mi',
-    PoloLife:  '23.3–21.4 kWh/100mi',
-    PoloStyle: '23.5–21.6 kWh/100mi',
-    PoloGTI:   '25.1–23.0 kWh/100mi',
+    Trend_50:      '22.7–22.5 kWh / 100 mi',
+    Life_50:       '25.1–22.5 kWh / 100 mi',
+    Life_58:       '24.9–22.4 kWh / 100 mi',
+    Life_79:       '25.3–23.0 kWh / 100 mi',
+    Style_50:      '25.3–22.9 kWh / 100 mi',
+    Style_58:      '25.1–22.7 kWh / 100 mi',
+    Style_79:      '25.4–23.2 kWh / 100 mi',
+    PoloTrend_37a: '22.2–20.6 kWh / 100 mi',
+    PoloLife_37a:  '22.7–20.8 kWh / 100 mi',
+    PoloLife_37b:  '23.0–21.1 kWh / 100 mi',
+    PoloLife_52a:  '23.3–21.4 kWh / 100 mi',
+    PoloStyle_37b: '23.2–21.2 kWh / 100 mi',
+    PoloStyle_52a: '23.5–21.6 kWh / 100 mi',
+    PoloGTI_52b:   '24.6–22.4 kWh / 100 mi',
   };
   function updateDisclaimer() {
     if (!disclaimerEl) return;
     const trim = document.getElementById('trim-select')?.value ?? 'Trend';
-    const consumption = consumptionData[trim];
+    const batt = document.getElementById('battery-select')?.value ?? '50';
+    const consumption = consumptionData[`${trim}_${batt}`];
     if (consumption) {
-      disclaimerEl.textContent = `Electricity combined fuel consumption ${consumption} · CO₂ emissions combined 0 g/km`;
+      disclaimerEl.textContent = `Electricity combined fuel consumption ${consumption} · CO₂ emissions combined 0 g / km`;
     } else {
-      disclaimerEl.textContent = 'CO₂ emissions combined 0 g/km';
+      disclaimerEl.textContent = 'CO₂ emissions combined 0 g / km';
     }
   }
   document.getElementById('trim-select')?.addEventListener('change', updateDisclaimer);
+  document.getElementById('battery-select')?.addEventListener('change', updateDisclaimer);
   updateDisclaimer();
   stickyBar?.addEventListener('click', () => {
     const target = document.getElementById('model-selection');
