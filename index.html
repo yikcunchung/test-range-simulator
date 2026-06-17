@@ -297,7 +297,7 @@ body {
   font-family: var(--font-text); font-size: 16px;
   font-weight: 700; line-height: 1.2; color: var(--navy);
 }
-.q-icon { width: 20px; height: 20px; display: inline-block; vertical-align: middle; margin-left: 8px; flex-shrink: 0; }
+.q-icon { width: 20px; height: 20px; display: none; vertical-align: middle; margin-left: 8px; flex-shrink: 0; }
 
 /* ── Floating label select ── */
 .fl-select { position: relative; overflow: visible; }
@@ -558,7 +558,7 @@ input[type="range"] {
 /* Model frame: gap:4 between Asset and Content */
 .model-frame { display: flex; flex-direction: column; gap: 4px; }
 
-/* Vehicle: full width, auto height */
+/* Car: full width, auto height */
 .vehicle-asset {
   width: 100%;
   background: transparent; overflow: hidden;
@@ -616,7 +616,7 @@ input[type="range"] {
 .result-header { display: flex; flex-direction: column; gap: 0; }
 .result-headline-row { display: flex; align-items: flex-start; gap: 8px; }
 .result-headline-label { font-family: var(--font-text); font-size: 16px; font-weight: 700; color: #fff; line-height: 1.2; }
-.result-info-icon { width: 24px; height: 24px; flex-shrink: 0; }
+.result-info-icon { width: 24px; height: 24px; flex-shrink: 0; display: none; }
 
 /* ── CTA: 420x44, border 1px rgba(41,48,67), r:100, p:8 32 ── */
 .cta-button {
@@ -805,23 +805,20 @@ input[type="range"] {
           <div class="question">
             <span class="question-label">Do you often drive faster than 120 km/h on the motorway? <svg class="q-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="rgba(27,34,54,1)" stroke-width="1.5"/><path d="M12 11V16" stroke="rgba(27,34,54,1)" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="8" r="0.8" fill="rgba(27,34,54,1)"/></svg></span>
           </div>
-          <!-- Switch: No | [track] | Yes -->
           <label class="vw-switch">
             <input type="checkbox" id="speed-toggle" onchange="updateRange()">
-            <span>No</span>
             <span class="vw-switch-track">
               <svg xmlns="http://www.w3.org/2000/svg" width="60" height="24" viewBox="0 0 60 24" fill="none"><rect x="1" y="1" width="58" height="22" rx="11" stroke="#293043" stroke-width="2"/></svg>
               <span class="vw-switch-track-bg"></span>
               <span class="vw-switch-knob"></span>
             </span>
-            <span>Yes</span>
           </label>
         </div>
 
         <!-- Combo 3: Tyres select -->
         <div class="combo">
           <div class="question">
-            <span class="question-label">What tyres does your vehicle have? <svg class="q-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="rgba(27,34,54,1)" stroke-width="1.5"/><path d="M12 11V16" stroke="rgba(27,34,54,1)" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="8" r="0.8" fill="rgba(27,34,54,1)"/></svg></span>
+            <span class="question-label">What tyres does your car have? <svg class="q-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="rgba(27,34,54,1)" stroke-width="1.5"/><path d="M12 11V16" stroke="rgba(27,34,54,1)" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="8" r="0.8" fill="rgba(27,34,54,1)"/></svg></span>
           </div>
           <div class="fl-select">
             <select id="tyre-select" onchange="tyreAutoSelected = false; syncSelectValue(this); updateRange()">
@@ -859,23 +856,20 @@ input[type="range"] {
           <div class="question">
             <span class="question-label">Is the heating or air conditioning on? <svg class="q-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="rgba(27,34,54,1)" stroke-width="1.5"/><path d="M12 11V16" stroke="rgba(27,34,54,1)" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="8" r="0.8" fill="rgba(27,34,54,1)"/></svg></span>
           </div>
-          <!-- Switch: No | [track] | Yes -->
           <label class="vw-switch">
             <input type="checkbox" id="ac-toggle" onchange="updateRange()">
-            <span>No</span>
             <span class="vw-switch-track">
               <svg xmlns="http://www.w3.org/2000/svg" width="60" height="24" viewBox="0 0 60 24" fill="none"><rect x="1" y="1" width="58" height="22" rx="11" stroke="#293043" stroke-width="2"/></svg>
               <span class="vw-switch-track-bg"></span>
               <span class="vw-switch-knob"></span>
             </span>
-            <span>Yes</span>
           </label>
         </div>
 
         <!-- Combo 6: Occupancy (Toggle) -->
         <div class="combo">
           <div class="question">
-            <span class="question-label">How many people are in the vehicle? <svg class="q-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="rgba(27,34,54,1)" stroke-width="1.5"/><path d="M12 11V16" stroke="rgba(27,34,54,1)" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="8" r="0.8" fill="rgba(27,34,54,1)"/></svg></span>
+            <span class="question-label">How many people are in the car? <svg class="q-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="rgba(27,34,54,1)" stroke-width="1.5"/><path d="M12 11V16" stroke="rgba(27,34,54,1)" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="8" r="0.8" fill="rgba(27,34,54,1)"/></svg></span>
           </div>
           <!-- Toggle: 1 person | [track] | Full — default ON = 1 person -->
           <label class="vw-toggle">
@@ -937,7 +931,7 @@ input[type="range"] {
 
           <!-- Model frame: Asset (420x210) + Content -->
           <div class="model-frame">
-            <!-- Vehicle: IMAGE fill in Figma, 420x210 -->
+            <!-- Car: IMAGE fill in Figma, 420x210 -->
             <div class="vehicle-asset">
               <img src="Assets/id3-trend.webp" alt="Volkswagen ID.3 Neo" id="car-img">
             </div>
@@ -986,7 +980,7 @@ input[type="range"] {
         <!-- Disclaimer: outside section-container so sticky stop = card bottom -->
         <div class="disclaimer">
           <span class="disclaimer-num">1</span>
-          <p class="disclaimer-copy">Estimated range only (based on user inputs and test values) for the standard German specification vehicle (model year 2024). Actual results will vary. Estimated range assumes the battery is fully charged (to 100%) and is depleted to 0%. Range figures are provided for information and comparability only. Only compare range figures with other vehicles tested to the same technical procedures. These figures may not reflect real life driving results, which will depend upon a number of factors including differences between UK and standard specification, the options you choose, accessories fitted (post-registration), variations in weather, driving styles, vehicle load, starting and finish charge etc. The tool provides an indicative impact for changes in some of these factors but this will not reflect your actual use. Battery electric vehicles require mains electricity for charging. Zero emissions while driving. Figures are subject to change due to ongoing approvals/changes in model specification. Please consult your retailer for further information. The vehicle specification used in the tool may vary due to review of the model range line up throughout the year. Data correct as at February 2024.</p>
+          <p class="disclaimer-copy">Estimated range only (based on user inputs and test values) for the standard German specification car (model year 2026). Actual results will vary. Estimated range assumes the battery is fully charged (to 100%) and is depleted to 0%. Range figures are provided for information and comparability only. Only compare range figures with other cars tested to the same technical procedures. These figures may not reflect real life driving results, which will depend upon a number of factors including differences between UK and standard specification, the options you choose, accessories fitted (post-registration), variations in weather, driving styles, car load, starting and finish charge etc. The tool provides an indicative impact for changes in some of these factors but this will not reflect your actual use. Battery electric cars require mains electricity for charging. Zero emissions while driving. Figures are subject to change due to ongoing approvals/changes in model specification. Please consult your retailer for further information. The car specification used in the tool may vary due to review of the model range line up throughout the year. Data correct as at February 2026.</p>
         </div>
 
   </div><!-- /range-simulator -->
